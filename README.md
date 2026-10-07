@@ -1,108 +1,93 @@
-<h1 align="center"> ⚡️ WondrWord ⚡️</h1>
+<h1 align="center">Wondr Word · Amusement Park Booking</h1>
 
+![Wondr Word](./Wonderland_Frontend/Images/image.png)
 
-![Logo](./Wonderland_Frontend/Images/image.png)
+A Spring Boot REST API, with an HTML/CSS/JavaScript frontend, for an amusement park: visitors plan their trip, buy tickets for activities and learn about attractions; admins manage activities, customers and tickets.
 
+**Portfolio:** [utkarash-thakur.vercel.app](https://utkarash-thakur.vercel.app)
 
-<!-- ### Link: https://drive.google.com/file/d/1F8R8e6eU3rrtEPq5xuSFkN33GKvMDMb4/view?usp=sharing  -->
+## Highlights
 
+- REST API for customers, activities and tickets, with separate `ADMIN` and `USER` roles.
+- Spring Security with JWT: one filter issues the token at sign-in, another validates it on every request.
+- Bean validation on request bodies, a `TicketDTO`, and a global exception handler that returns consistent error details.
+- Pagination for admin and activity lists; filters and sorting for activities by price, name and date.
+- Soft delete on users and activities, with created and updated timestamps on every record.
 
-## Acknowledgements:
+## Tech stack
 
-Wondr Wrod, the amusement park web application, built with Java Spring Boot, HTML, CSS, and JavaScript, helps visitors to plan their trip, purchase tickets for different activities , and learn about park attractions. It features user authentication, user-friendly interfaces. The application provides a seamless experience for visitors, making their trip more enjoyable.
-## Functions:
+| Area | Tools |
+| --- | --- |
+| Backend | Java 17, Spring Boot 3, Spring Web, Spring Data JPA, Lombok |
+| Security | Spring Security, JWT |
+| Database | MySQL |
+| Docs and testing | springdoc-openapi (Swagger), Postman |
+| Frontend | HTML, CSS, JavaScript |
 
-## Base:
-- WondrWordApplication
+## Data model
 
-## Controller:
-- AdminController
-- CustomerController
-- TicketController
-- ActivityController
+`Admin` and `Customer` (both extend `AbstractUser`) · `Activity` · `Ticket`
 
-## End Points:
- 
- ### *Admin Controller Endpoints*
+A customer has many tickets; each ticket is for one activity, with a visit date, number of people and price.
 
-- **POST** `/admin/registerAdmin` Register a new admin user.
-- **GET** `/admin/signin` Authenticate an admin user.
-- **DELETE** `/admin/delete/{adminId}` Delete an admin user.
-- **GET** `/admin/{adminId}` Get admin by ID.
-- **GET** `/admin/all` Get all admins with pagination.
-- **GET** `/admin/customers` Get all customers.
-- **GET** `/admin/customers/{customerId}` Get customer by ID.
-- **DELETE** `/admin/customers/delete/{customerId}` Delete a customer.
+![ER diagram](./Wonderland_Frontend/Images/ER.jpg)
 
- ### *Customer Controller Endpoints*
+## API
 
-- **POST** `/customers/registerCustomer` Register a new customer.
-- **GET** `/customers/signin` Authenticate a customer.
-- **PUT** `/customers/update/{customerId}` Update customer details.
-- **DELETE** `/customers/delete/{customerId}` Delete a customer.
-- **GET** `/customers/{customerId}` Get customer by ID.
+**Public**
+- `POST /customers/registerCustomer`: register a customer
+- `POST /admin/registerAdmin`: register an admin (open only while no admin exists; after that, a signed-in admin must call it)
 
+**Customer (`USER` role)**
+- `GET /customers/signin`: sign in; the JWT comes back in the response header
+- `PUT /customers/update/{customerId}`, `DELETE /customers/delete/{customerId}`, `GET /customers/{customerId}`
+- `GET /customers/activity/all`, `/customers/activity/getActivitiesByCharge`, `/customers/activity/getAllActivitiesByDate`: browse activities
+- `POST /customers/ticket/{customerId}/{activityId}`: book a ticket
+- `PUT | GET | DELETE /customers/ticket/{customerId}/{ticketId}`: manage a ticket
+- `GET /customers/ticket/history/{customerId}`, `/todayHistory/{customerId}`, `/fair/{customerId}`: history and total fare
 
-### *Ticket Controller Endpoints*
-- **GET** `/admin/ticket/getAllTicket` Get all tickets.
-- **GET** `/admin/ticket/{ticketId}` Get ticket by ID.
-- **POST** `/customers/ticket/{customerId}/{activityId}` Create a new ticket.
-- **PUT** `/customers/ticket/{customerId}/{ticketId}` Update a ticket.
-- **GET** `/customers/ticket/{customerId}/{ticketId}` Get ticket by ticket ID.
-- **DELETE** `/customers/ticket/{customerId}/{ticketId}` Delete a ticket.
-- **GET** `/customers/ticket/history/{customerId}` Get ticket booking history with pagination.
-- **GET** `/customers/ticket/todayHistory/{customerId}` Get ticket booking history for the day.
-- **GET** `/customers/ticket/fair/{customerId}` Get total fare for the customer.
-### *Activity Controller Endpoints*
-   
-- **POST** `/admin/activity/add` Add a new activity.
-- **PUT** `/admin/activity/update/{activityId}` Update an activity.
-- **DELETE** `/admin/activity/delete/{activityId}` Delete an activity.
-- **GET** `/admin/activity/all` Get all activities with pagination.
-- **GET** `/admin/activity/{activityId}` Get activity by ID.
-- **GET** `/admin/activity/getActivitiesByCharge` Get activities by charge.
-- **GET** `/admin/activity/getNumberOfActivitiesByCharge/{charge}` Get count of activities by charge.
-- **GET** `/admin/activity/getAllActivitiesByDate` Get activities within a date range.
-- **GET** `/admin/activity/getAllActivitiesOfCustomerByDate/{customerId}/date` Get activities of a customer within a date range.
+**Admin (`ADMIN` role)**
+- `GET /admin/signin`, `GET /admin/all`, `GET /admin/{adminId}`, `DELETE /admin/delete/{adminId}`
+- `GET /admin/customers`, `GET /admin/customers/{customerId}`, `DELETE /admin/customers/delete/{customerId}`
+- `POST /admin/activity/add`, `PUT /admin/activity/update/{activityId}`, `DELETE /admin/activity/delete/{activityId}`
+- `GET /admin/activity/all` and filter and report endpoints (by charge, by date, by customer)
+- `GET /admin/ticket/getAllTicket`, `GET /admin/ticket/{ticketId}`
 
-## Model:
-- Admin
-- Customer
-- Ticket
-- Activity
+## Project structure
 
-## DTO:
-- TicketDTO
+```
+WonderWorld_Park_BK/src/main/java/com/masai
+├── controller/   Admin, Customer, Activity, Ticket controllers
+├── service/      business logic (+ UserDetailsService for Spring Security)
+├── repository/   Spring Data JPA repositories
+├── model/        AbstractUser, Admin, Customer, Activity, Ticket, Role
+├── security/     AppConfig, JWT generator and validator filters
+├── DTO/          TicketDTO
+└── Exception/    custom exceptions + GlobalExceptionHandler
+Wonderland_Frontend/   HTML, CSS and JavaScript pages
+```
 
-## Exceptions:
-- AdminException
-- CustomerException
-- TicketException
-- ActivityException
-- GlobalErrorException
-- ErrorDetails
+## Run it locally
 
-## Teck Stacks:
-- Java
-- Hibernate
-- SpringBoot
-- REST API
-- Lombok
-- SQL
-- Swagger
-- Postman
+1. Install Java 17 and MySQL, then create the database:
+   ```sql
+   CREATE DATABASE wonder;
+   ```
+2. Set your MySQL username in `WonderWorld_Park_BK/src/main/resources/application.properties`. Tables are created on first start.
+   The password is read from the `DB_PASSWORD` environment variable and is never stored in the repo. Set it in the same terminal before starting:
+   ```bash
+   export DB_PASSWORD=your_mysql_password       # macOS, Linux, Git Bash
+   ```
+   ```powershell
+   $env:DB_PASSWORD = "your_mysql_password"    # Windows PowerShell
+   ```
+3. Start the API from `WonderWorld_Park_BK`:
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+   It runs on `http://localhost:8888`.
+4. Open `Wonderland_Frontend/index.html` in a browser for the frontend.
 
-<!-- ## Class method design:
-![image](./)
+## Author
 
-## Class module design:
-![image](https://user-images.githubusercontent.com/104348363/201664014-a1eb958f-0986-47e0-8c5d-16c760ba5113.png) -->
-
-##  ER Diagram:
-![alt text](./Wonderland_Frontend/Images/ER.jpg)
-
-## Restrictions:
-- Before performing any task the user should be confirmed whether the user is Admin or Customer and for that the user should have logged in.<br/>
-- For each contoller we need to provide the login details for implementation of particular methods i.e, if the customer wants to purchase some planter then he/she should give his/her correct name during purchasing session and only customer can perform that action and for that One to Many relationship is established.
-- If we want to add some plants or seeds then only admin can do that so here we have provided the validation i.e during adding a particular item  user should give the correct name of the admin otherwise it will throw an exception and that exception is properly handled.
-
+**Utkarash Thakur**, Backend Engineer · [Portfolio](https://utkarash-thakur.vercel.app) · [LinkedIn](https://www.linkedin.com/in/utkarash-thakur/)
