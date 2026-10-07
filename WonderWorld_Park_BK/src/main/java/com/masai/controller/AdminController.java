@@ -61,12 +61,20 @@ public class AdminController {
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	
-	
-	
-	
+
+	@Autowired
+	private AdminRepository adminRepository;
+
+
+
+	// Open only for the very first admin (bootstrap). After that, only a logged-in admin can add admins.
 	@PostMapping("/registerAdmin")
-	public ResponseEntity<Admin> createAdmin(@Valid @RequestBody Admin admin) throws AdminException{
+	public ResponseEntity<Admin> createAdmin(@Valid @RequestBody Admin admin, Authentication auth) throws AdminException{
+		boolean callerIsAdmin = auth != null && auth.getAuthorities().stream()
+				.anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+		if (adminRepository.count() > 0 && !callerIsAdmin) {
+			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+		}
 		admin.setIsDeleted(false);
 		admin.setPassword(passwordEncoder.encode(admin.getPassword()));
 		Admin ad = adminService.insertAdmin(admin);

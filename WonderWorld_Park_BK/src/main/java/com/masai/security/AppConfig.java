@@ -54,6 +54,7 @@ public class AppConfig implements WebMvcConfigurer{
 		})
 		.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/swagger-ui*/**", "/v3/api-docs/**").permitAll()
+				// registerAdmin open only for the first admin; AdminController blocks it after that
 				.requestMatchers(HttpMethod.POST, "/customers/registerCustomer", "/admin/registerAdmin").permitAll()
 				.requestMatchers("/customers/**").hasRole("USER")
 				.requestMatchers("/admin/**").hasRole("ADMIN")
